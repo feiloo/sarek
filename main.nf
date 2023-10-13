@@ -25,7 +25,6 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     GENOME PARAMETER VALUES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 params.ascat_alleles         = WorkflowMain.getGenomeAttribute(params, 'ascat_alleles')
 params.ascat_genome          = WorkflowMain.getGenomeAttribute(params, 'ascat_genome')
 params.ascat_loci            = WorkflowMain.getGenomeAttribute(params, 'ascat_loci')
@@ -60,49 +59,17 @@ params.vep_cache_version     = WorkflowMain.getGenomeAttribute(params, 'vep_cach
 params.vep_genome            = WorkflowMain.getGenomeAttribute(params, 'vep_genome')
 params.vep_species           = WorkflowMain.getGenomeAttribute(params, 'vep_species')
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ALTERNATIVE INPUT FILE ON RESTART
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-params.input_restart = WorkflowSarek.retrieveInput(params, log)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE & PRINT PARAMETER SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-include { validateParameters; paramsHelp } from 'plugin/nf-validation'
-
-// Print help message if needed
-if (params.help) {
-    def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-    def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-    def String command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome GATK.GRCh38 -profile docker --outdir results"
-    log.info logo + paramsHelp(command) + citation + NfcoreTemplate.dashedLine(params.monochrome_logs)
-    System.exit(0)
-}
-
-// Validate input parameters
-if (params.validate_params) {
-    validateParameters()
-}
-
-WorkflowMain.initialise(workflow, params, log)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    NAMED WORKFLOW FOR PIPELINE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 
 include { SAREK } from './workflows/sarek'
 
 // WORKFLOW: Run main nf-core/sarek analysis pipeline
 workflow NFCORE_SAREK {
-    SAREK ()
+    take:
+      args
+    main:
+    SAREK (args)
 }
 
 /*
@@ -114,7 +81,9 @@ workflow NFCORE_SAREK {
 // WORKFLOW: Execute a single named workflow for the pipeline
 // See: https://github.com/nf-core/rnaseq/issues/619
 workflow {
-    NFCORE_SAREK ()
+    def args = [:]
+      for (param in params) { args[param.key] = param.value }
+    NFCORE_SAREK (args)
 }
 
 /*
