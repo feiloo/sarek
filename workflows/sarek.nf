@@ -98,10 +98,8 @@ take:
   args
 
 main:
-  println args
-
-//  args.= args
-
+  println args.dbsnp
+  println params.dbsnp
 
 
 // Check input path parameters to see if they exist
@@ -274,8 +272,6 @@ if (args.step != 'annotate' && args.tools && !args.build_only_index) {
         }
     }
 }
-}
-/*
 
 // Fails when wrongfull extension for intervals file
 if (args.wes && !args.step == 'annotate') {
@@ -464,10 +460,10 @@ if (args.spliceai_snv && args.spliceai_snv_tbi && args.spliceai_indel && args.sp
 
 
     // MULTIQC
-    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_config                     = Channel.fromPath("$moduleDir/../assets/multiqc_config.yml", checkIfExists: true)
     ch_multiqc_custom_config              = args.multiqc_config ? Channel.fromPath( args.multiqc_config, checkIfExists: true ) : Channel.empty()
     ch_multiqc_logo                       = args.multiqc_logo   ? Channel.fromPath( args.multiqc_logo, checkIfExists: true ) : Channel.empty()
-    ch_multiqc_custom_methods_description = args.multiqc_methods_description ? file(args.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_multiqc_custom_methods_description = args.multiqc_methods_description ? file(args.multiqc_methods_description, checkIfExists: true) : file("$moduleDir/../assets/methods_description_template.yml", checkIfExists: true)
 
     // To gather all QC reports for MultiQC
     reports  = Channel.empty()
@@ -1270,12 +1266,8 @@ if (args.spliceai_snv && args.spliceai_snv_tbi && args.spliceai_indel && args.sp
     }
 
     if (!(args.skip_tools && args.skip_tools.split(',').contains('multiqc'))) {
-        methods_description    = WorkflowSarek.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, args.
-        ch_methods_description = Channel.value(methods_description)
-
         multiqc_files = Channel.empty()
         multiqc_files = multiqc_files.mix(version_yaml)
-        multiqc_files = multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
         multiqc_files = multiqc_files.mix(reports.collect().ifEmpty([]))
 
         MULTIQC(multiqc_files.collect(), ch_multiqc_config.collect().ifEmpty([]), ch_multiqc_custom_config.collect().ifEmpty([]), ch_multiqc_logo.collect().ifEmpty([]))
@@ -1291,20 +1283,6 @@ if (args.spliceai_snv && args.spliceai_snv_tbi && args.spliceai_indel && args.sp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow.onComplete {
-    if (args.email || args.email_on_fail) {
-        NfcoreTemplate.email(workflow, args. summary_args. projectDir, log, multiqc_report)
-    }
-    NfcoreTemplate.dump_parameters(workflow, args.
-    NfcoreTemplate.summary(workflow, args. log)
-    if (args.hook_url) NfcoreTemplate.IM_notification(workflow, args. summary_args. projectDir, log)
-}
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    FUNCTIONS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 // Parse first line of a FASTQ file, return the flowcell id and lane number.
 def flowcellLaneFromFastq(path) {
     // expected format:
@@ -1337,5 +1315,4 @@ def flowcellLaneFromFastq(path) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     THE END
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 */

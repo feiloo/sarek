@@ -69,7 +69,8 @@ workflow NFCORE_SAREK {
     take:
       args
     main:
-    SAREK (args)
+
+      SAREK (args)
 }
 
 /*
@@ -82,7 +83,8 @@ workflow NFCORE_SAREK {
 // See: https://github.com/nf-core/rnaseq/issues/619
 workflow {
     def args = [:]
-      for (param in params) { args[param.key] = param.value }
+    for (param in params) { args[param.key] = param.value }
+
     NFCORE_SAREK (args)
 }
 
